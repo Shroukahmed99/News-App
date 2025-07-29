@@ -5,15 +5,18 @@ import 'package:news_app/services/news_servic.dart';
 part 'list_view_state.dart';
 
 class ListVeiwCubit extends Cubit<ListVeiwState> {
+  final NewsServic newsServic;
+
   ListVeiwCubit(this.newsServic) : super(ListVeiwInitial());
-  NewsServic newsServic;
-  List<ArticleModel> articaList = [];
+
+  List<ArticleModel> articleList = [];
+
   void getNews({required String category}) async {
     emit(ListVeiwLoding());
     try {
-      articaList = await newsServic.getNews(category: category);
-      emit(ListVeiwSaccess());
-    } on Exception catch (e) {
+      articleList = await newsServic.getNews(category: category);
+      emit(ListVeiwSaccess(articleList));
+    } catch (_) {
       emit(ListVeiwFailure());
     }
   }

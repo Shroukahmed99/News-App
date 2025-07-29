@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:news_app/widgets/categories_list_view.dart';
 import 'package:news_app/widgets/news_list_view_builder.dart';
-
 import '../settings/settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -26,7 +25,7 @@ class HomeScreen extends StatelessWidget {
             Text(
               'Cloud',
               style: TextStyle(
-                color: Colors.yellow,
+                color: Colors.deepPurple,
                 fontWeight: FontWeight.bold,
               ),
             )
@@ -52,9 +51,7 @@ class HomeScreen extends StatelessWidget {
           physics: BouncingScrollPhysics(),
           slivers: [
             SliverToBoxAdapter(child: CategoriesListView()),
-            SliverToBoxAdapter(
-              child: SizedBox(height: 32),
-            ),
+            SliverToBoxAdapter(child: SizedBox(height: 16)),
             NewsListViewBuilder(category: 'general'),
           ],
         ),
