@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app/views/forgot_password_screen.dart';
-import 'package:news_app/views/home/home_screen.dart';
+import 'package:news_app/views/home/home_view.dart';
 import 'package:news_app/views/register_screen.dart';
 import '../../cubits/auth/auth_cubit.dart';
 import '../../cubits/auth/auth_state.dart';

@@ -1,7 +1,8 @@
 // views/session_check_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:news_app/views/home/home_screen.dart';
+import 'package:news_app/views/home/home_view.dart';
+
 
 import 'package:news_app/views/login_screen.dart';
 import '../../cubits/session/session_cubit.dart';
