@@ -1,12 +1,14 @@
-// views/register/register_screen.dart
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:news_app/screens/login_screen.dart';
+import 'package:news_app/views/login_screen.dart';
 import '../../cubits/auth/auth_cubit.dart';
 import '../../cubits/auth/auth_state.dart';
 import '../../widgets/form/custom_text_form_field.dart';
 import '../../widgets/form/password_form_field.dart';
 import '../../widgets/form/custom_button.dart';
+import '../../widgets/form/date_picker_field.dart';
+import '../../widgets/form/image_picker_field.dart';
 import '../../utils/validation_utils.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -25,6 +27,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final confirmPasswordController = TextEditingController();
   final securityQuestionController = TextEditingController();
   final securityAnswerController = TextEditingController();
+
+  DateTime? dateOfBirth;
+  File? profileImage;
+  bool agreedToTerms = false;
 
   @override
   void dispose() {
@@ -45,10 +51,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         title: const Text("Register"),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
-        elevation: 0,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: BlocConsumer<AuthCubit, AuthState>(
           listener: (context, state) {
             if (state is AuthError) {
@@ -104,6 +109,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
+                  DatePickerField(
+                    label: "Date of Birth",
+                    selectedDate: dateOfBirth,
+                    onDateSelected: (date) {
+                      setState(() => dateOfBirth = date);
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  ImagePickerField(
+                    image: profileImage,
+                    onImageSelected: (file) {
+                      setState(() => profileImage = file);
+                    },
+                  ),
+                  const SizedBox(height: 10),
                   CustomTextFormField(
                     label: "Security Question",
                     controller: securityQuestionController,
@@ -119,12 +139,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ? "Answer is required"
                         : null,
                   ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: agreedToTerms,
+                        onChanged: (val) =>
+                            setState(() => agreedToTerms = val ?? false),
+                      ),
+                      const Expanded(
+                        child: Text("I agree to the Terms & Conditions"),
+                      ),
+                    ],
+                  ),
+                  if (!agreedToTerms)
+                    const Padding(
+                      padding: EdgeInsets.only(left: 8.0),
+                      child: Text(
+                        "You must accept the terms to register",
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
                   const SizedBox(height: 20),
                   CustomButton(
                     text: "Register",
                     isLoading: state is AuthLoading,
                     onPressed: () {
-                      if (_formKey.currentState!.validate()) {
+                      if (_formKey.currentState!.validate() && agreedToTerms) {
                         context.read<AuthCubit>().register(
                               firstName: firstNameController.text.trim(),
                               lastName: lastNameController.text.trim(),

@@ -1,7 +1,8 @@
-// lib/main.dart
+// main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'screens/login_screen.dart';
+import 'views/login_screen.dart';
+import 'views/session_check_screen.dart'; // ✅ هنا الإضافة
 import 'cubits/auth/auth_cubit.dart';
 import 'cubits/forget password/forgot_password_cubit.dart';
 import 'cubits/session/session_cubit.dart';
@@ -34,7 +35,7 @@ class NewsApp extends StatelessWidget {
         navigatorKey: navigatorKey,
         title: 'News App',
         debugShowCheckedModeBanner: false,
-        home: const LoginScreen(),
+        home: const SessionCheckScreen(), // ✅ هنا التغيير
       ),
     );
   }

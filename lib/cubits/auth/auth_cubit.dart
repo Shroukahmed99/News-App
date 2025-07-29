@@ -12,23 +12,27 @@ class AuthCubit extends Cubit<AuthState> {
 
   AuthCubit(this._authService) : super(AuthInitial());
 
- void login(String email, String password, bool rememberMe) async {
+void login(String email, String password, bool rememberMe) async {
   emit(AuthLoading());
   final user = await _authService.login(email, password);
 
   if (user != null) {
+    final sessionCubit = BlocProvider.of<SessionCubit>(navigatorKey.currentContext!);
+
     if (rememberMe) {
-      // ✅ لو معلّم على Remember Me، احفظ الجلسة واسمح بالدخول
-      final sessionCubit = BlocProvider.of<SessionCubit>(navigatorKey.currentContext!);
+      // ✅ حفظ الجلسة وتفعيل auto-login
       await sessionCubit.setSession(user.id, rememberMe: true);
-      emit(AuthSuccess(user));
     } else {
-      emit(AuthError("Please check 'Remember Me' to login"));
+      // ❗️لا يتم الحفظ للجيل القادم لكن يتم السماح بالدخول الحالي
+      await sessionCubit.setSession(user.id, rememberMe: false);
     }
+
+    emit(AuthSuccess(user));
   } else {
     emit(AuthError("Email or password is incorrect"));
   }
 }
+
 
 
 
