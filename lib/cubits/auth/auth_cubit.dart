@@ -1,4 +1,3 @@
-// cubits/auth/auth_cubit.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app/cubits/session/session_cubit.dart';
 import 'package:news_app/main.dart';
@@ -12,69 +11,76 @@ class AuthCubit extends Cubit<AuthState> {
 
   AuthCubit(this._authService) : super(AuthInitial());
 
-void login(String email, String password, bool rememberMe) async {
-  emit(AuthLoading());
-  final user = await _authService.login(email, password);
+  void login(String email, String password, bool rememberMe) async {
+    emit(AuthLoading());
+    final user = await _authService.login(email, password);
 
-  if (user != null) {
-    final sessionCubit = BlocProvider.of<SessionCubit>(navigatorKey.currentContext!);
+    if (user != null) {
+      final sessionCubit =
+          BlocProvider.of<SessionCubit>(navigatorKey.currentContext!);
 
-    if (rememberMe) {
-      // ✅ حفظ الجلسة وتفعيل auto-login
-      await sessionCubit.setSession(user.id, rememberMe: true);
+      if (rememberMe) {
+        await sessionCubit.setSession(user.id, rememberMe: true);
+      } else {
+        await sessionCubit.setSession(user.id, rememberMe: false);
+      }
+
+      emit(AuthSuccess(user));
     } else {
-      // ❗️لا يتم الحفظ للجيل القادم لكن يتم السماح بالدخول الحالي
-      await sessionCubit.setSession(user.id, rememberMe: false);
+      emit(AuthError("Email or password is incorrect"));
     }
-
-    emit(AuthSuccess(user));
-  } else {
-    emit(AuthError("Email or password is incorrect"));
   }
-}
-
-
-
 
   void register({
-  required String firstName,
-  required String lastName,
-  required String email,
-  required String password,
-  required String securityQuestion,
-  required String securityAnswer,
-}) async {
-  emit(AuthLoading());
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String password,
+    required String securityQuestion,
+    required String securityAnswer,
+    String? phoneNumber,
+    DateTime? dateOfBirth,
+    String? profileImagePath,
+  }) async {
+    emit(AuthLoading());
 
-  final exists = await _authService.isUserExists(email);
-  if (exists) {
-    emit(AuthError("Email already exists"));
-    return;
+    final exists = await _authService.isUserExists(email);
+    if (exists) {
+      emit(AuthError("Email already exists"));
+      return;
+    }
+
+    final id = const Uuid().v4();
+    final newUser = UserModel(
+      id: id,
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      passwordHash: '',
+      phoneNumber: phoneNumber,
+      dateOfBirth: dateOfBirth,
+      profileImage: profileImagePath,
+      createdAt: DateTime.now(),
+      securityQuestion: securityQuestion,
+      securityAnswer: securityAnswer,
+    );
+
+    final savedUser = await _authService.register(newUser, password);
+    emit(AuthSuccess(savedUser));
   }
 
-  final id = const Uuid().v4();
-  final newUser = UserModel(
-    id: id,
-    firstName: firstName,
-    lastName: lastName,
-    email: email,
-    passwordHash: '',
-    createdAt: DateTime.now(),
-    securityQuestion: securityQuestion,
-    securityAnswer: securityAnswer,
-  );
-
-  final savedUser = await _authService.register(newUser, password);
-  emit(AuthSuccess(savedUser));
-}
-
+  void updateProfile(UserModel updatedUser) async {
+    emit(AuthLoading());
+    final result = await _authService.updateUser(updatedUser);
+    if (result != null) {
+      emit(AuthSuccess(result));
+    } else {
+      emit(AuthError("Failed to update profile"));
+    }
+  }
 
   void logout() async {
     await _authService.logout();
     emit(AuthLoggedOut());
   }
-
-
-  
-
 }

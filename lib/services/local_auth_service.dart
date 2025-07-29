@@ -62,6 +62,17 @@ class LocalAuthService {
     return newUser;
   }
 
+  Future<UserModel?> updateUser(UserModel updatedUser) async {
+  final users = await _getUsers();
+  final index = users.indexWhere((u) => u.id == updatedUser.id);
+  if (index == -1) return null;
+
+  users[index] = updatedUser;
+  await _saveUsers(users);
+  return updatedUser;
+}
+
+
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(currentUserKey);

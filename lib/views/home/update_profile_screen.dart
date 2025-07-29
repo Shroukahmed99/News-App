@@ -21,12 +21,14 @@ class UpdateProfileScreen extends StatefulWidget {
 
 class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   final _formKey = GlobalKey<FormState>();
+
   late TextEditingController firstNameController;
   late TextEditingController lastNameController;
   late TextEditingController emailController;
   late TextEditingController phoneController;
   late TextEditingController securityQuestionController;
   late TextEditingController securityAnswerController;
+
   DateTime? birthDate;
   String? profileImage;
 
@@ -37,8 +39,10 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     lastNameController = TextEditingController(text: user.lastName);
     emailController = TextEditingController(text: user.email);
     phoneController = TextEditingController(text: user.phoneNumber ?? '');
-    securityQuestionController = TextEditingController(text: user.securityQuestion ?? '');
-    securityAnswerController = TextEditingController(text: user.securityAnswer ?? '');
+    securityQuestionController =
+        TextEditingController(text: user.securityQuestion ?? '');
+    securityAnswerController =
+        TextEditingController(text: user.securityAnswer ?? '');
     birthDate = user.dateOfBirth;
     profileImage = user.profileImage;
     super.initState();
@@ -125,15 +129,30 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                   const SizedBox(height: 20),
                   CustomButton(
                     text: "Save Changes",
+                    isLoading: state is AuthLoading,
                     onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        // TODO: Send updated data to AuthCubit or repository
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Profile updated successfully")),
-                        );
-                        Navigator.pop(context);
-                      }
-                    },
+  if (_formKey.currentState!.validate()) {
+    final updatedUser = widget.user.copyWith(
+      firstName: firstNameController.text.trim(),
+      lastName: lastNameController.text.trim(),
+      email: emailController.text.trim(),
+      phoneNumber: phoneController.text.trim(),
+      dateOfBirth: birthDate,
+      profileImage: profileImage,
+      securityQuestion: securityQuestionController.text.trim(),
+      securityAnswer: securityAnswerController.text.trim(),
+    );
+
+    context.read<AuthCubit>().updateProfile(updatedUser);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Profile updated successfully")),
+    );
+
+    Navigator.pop(context);
+  }
+},
+
                     color: Colors.deepPurple,
                   ),
                 ],

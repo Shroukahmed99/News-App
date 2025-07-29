@@ -2,11 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app/views/home/update_profile_screen.dart';
 import 'package:news_app/views/home/change_password_screen.dart';
+import 'package:news_app/views/home/home_screen.dart';
+import 'package:news_app/views/login_screen.dart';
 import 'package:news_app/cubits/auth/auth_cubit.dart';
 import 'package:news_app/cubits/auth/auth_state.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
+
+  void _confirmLogout(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Confirm Logout"),
+        content: const Text("Are you sure you want to logout?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx); // Close dialog
+              context.read<AuthCubit>().logout(); // Trigger logout
+            },
+            child: const Text("Yes"),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +41,16 @@ class SettingsScreen extends StatelessWidget {
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
       ),
-      body: BlocBuilder<AuthCubit, AuthState>(
+      body: BlocConsumer<AuthCubit, AuthState>(
+        listener: (context, state) {
+          if (state is AuthLoggedOut) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const LoginScreen()),
+              (route) => false,
+            );
+          }
+        },
         builder: (context, state) {
           if (state is AuthSuccess) {
             final currentUser = state.user;
@@ -51,10 +85,24 @@ class SettingsScreen extends StatelessWidget {
                     );
                   },
                 ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.logout),
+                  title: const Text("Logout"),
+                  trailing: const Icon(Icons.arrow_forward_ios),
+                  onTap: () => _confirmLogout(context),
+                ),
               ],
             );
           } else {
-            return const Center(child: Text("User not logged in"));
+            // ✅ لو المستخدم مش داخل، وده حصل عن طريق أي مشكلة، رجّعه للهوم
+            Future.microtask(() {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+              );
+            });
+            return const SizedBox(); // Placeholder widget
           }
         },
       ),
