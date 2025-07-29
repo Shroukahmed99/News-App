@@ -1,4 +1,4 @@
-// ✅ views/register/register_screen.dart
+// views/register/register_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app/screens/login_screen.dart';
@@ -6,6 +6,7 @@ import '../../cubits/auth/auth_cubit.dart';
 import '../../cubits/auth/auth_state.dart';
 import '../../widgets/form/custom_text_form_field.dart';
 import '../../widgets/form/password_form_field.dart';
+import '../../widgets/form/custom_button.dart';
 import '../../utils/validation_utils.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -40,7 +41,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Register")),
+      appBar: AppBar(
+        title: const Text("Register"),
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: BlocConsumer<AuthCubit, AuthState>(
@@ -101,35 +107,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   CustomTextFormField(
                     label: "Security Question",
                     controller: securityQuestionController,
-                    validator: (val) =>
-                        val == null || val.isEmpty ? "Security question is required" : null,
+                    validator: (val) => val == null || val.isEmpty
+                        ? "Security question is required"
+                        : null,
                   ),
                   const SizedBox(height: 10),
                   CustomTextFormField(
                     label: "Security Answer",
                     controller: securityAnswerController,
-                    validator: (val) =>
-                        val == null || val.isEmpty ? "Answer is required" : null,
+                    validator: (val) => val == null || val.isEmpty
+                        ? "Answer is required"
+                        : null,
                   ),
                   const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: state is AuthLoading
-                        ? null
-                        : () {
-                            if (_formKey.currentState!.validate()) {
-                              context.read<AuthCubit>().register(
-                                    firstName: firstNameController.text.trim(),
-                                    lastName: lastNameController.text.trim(),
-                                    email: emailController.text.trim(),
-                                    password: passwordController.text.trim(),
-                                    securityQuestion: securityQuestionController.text.trim(),
-                                    securityAnswer: securityAnswerController.text.trim(),
-                                  );
-                            }
-                          },
-                    child: state is AuthLoading
-                        ? const CircularProgressIndicator()
-                        : const Text("Register"),
+                  CustomButton(
+                    text: "Register",
+                    isLoading: state is AuthLoading,
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        context.read<AuthCubit>().register(
+                              firstName: firstNameController.text.trim(),
+                              lastName: lastNameController.text.trim(),
+                              email: emailController.text.trim(),
+                              password: passwordController.text.trim(),
+                              securityQuestion:
+                                  securityQuestionController.text.trim(),
+                              securityAnswer:
+                                  securityAnswerController.text.trim(),
+                            );
+                      }
+                    },
+                    color: Colors.deepPurple,
                   ),
                 ],
               ),

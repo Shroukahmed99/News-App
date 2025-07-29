@@ -7,16 +7,13 @@ import 'package:news_app/models/user_model.dart';
 abstract class ForgotPasswordState {}
 
 class ForgotPasswordInitial extends ForgotPasswordState {}
-
 class ForgotPasswordLoading extends ForgotPasswordState {}
-
 class ForgotPasswordShowSecurityQuestion extends ForgotPasswordState {
   final String question;
   ForgotPasswordShowSecurityQuestion(this.question);
 }
-
 class ForgotPasswordSuccess extends ForgotPasswordState {}
-
+class ForgotPasswordResetDone extends ForgotPasswordState {}
 class ForgotPasswordError extends ForgotPasswordState {
   final String message;
   ForgotPasswordError(this.message);
@@ -32,8 +29,7 @@ class ForgotPasswordCubit extends Cubit<ForgotPasswordState> {
     emit(ForgotPasswordLoading());
 
     final users = await _authService.getUsers();
-   final user = users.firstWhereOrNull((u) => u.email == email);
-
+    final user = users.firstWhereOrNull((u) => u.email == email);
 
     if (user == null) {
       emit(ForgotPasswordError("Email not found"));
@@ -72,7 +68,7 @@ class ForgotPasswordCubit extends Cubit<ForgotPasswordState> {
     );
 
     if (result) {
-      emit(ForgotPasswordSuccess());
+      emit(ForgotPasswordResetDone());
     } else {
       emit(ForgotPasswordError("Failed to reset password"));
     }
