@@ -6,6 +6,7 @@ import 'package:news_app/views/home/home_screen.dart';
 import 'package:news_app/views/login_screen.dart';
 import 'package:news_app/cubits/auth/auth_cubit.dart';
 import 'package:news_app/cubits/auth/auth_state.dart';
+import 'package:news_app/views/home/saved_articles_screen.dart'; // ✅ تأكد أنك عملت الصفحة دي
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -23,8 +24,8 @@ class SettingsScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(ctx); // Close dialog
-              context.read<AuthCubit>().logout(); // Trigger logout
+              Navigator.pop(ctx);
+              context.read<AuthCubit>().logout();
             },
             child: const Text("Yes"),
           ),
@@ -87,6 +88,20 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 const Divider(),
                 ListTile(
+                  leading: const Icon(Icons.bookmark),
+                  title: const Text("Saved Articles"),
+                  trailing: const Icon(Icons.arrow_forward_ios),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const SavedArticlesScreen(),
+                      ),
+                    );
+                  },
+                ),
+                const Divider(),
+                ListTile(
                   leading: const Icon(Icons.logout),
                   title: const Text("Logout"),
                   trailing: const Icon(Icons.arrow_forward_ios),
@@ -95,14 +110,13 @@ class SettingsScreen extends StatelessWidget {
               ],
             );
           } else {
-            // ✅ لو المستخدم مش داخل، وده حصل عن طريق أي مشكلة، رجّعه للهوم
             Future.microtask(() {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (_) => const LoginScreen()),
               );
             });
-            return const SizedBox(); // Placeholder widget
+            return const SizedBox();
           }
         },
       ),

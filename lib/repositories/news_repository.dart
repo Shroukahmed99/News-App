@@ -18,7 +18,9 @@ class NewsRepository {
       );
 
       final articles = response.data['articles'] as List;
-      return articles.map((e) => ArticleModel.fromJson(e)).toList();
+      return articles.map((e) {
+        return ArticleModel.fromJson(e)..category = category;
+      }).toList();
     } catch (_) {
       return [];
     }

@@ -19,11 +19,7 @@ class AuthCubit extends Cubit<AuthState> {
       final sessionCubit =
           BlocProvider.of<SessionCubit>(navigatorKey.currentContext!);
 
-      if (rememberMe) {
-        await sessionCubit.setSession(user.id, rememberMe: true);
-      } else {
-        await sessionCubit.setSession(user.id, rememberMe: false);
-      }
+      await sessionCubit.setSession(user, rememberMe: rememberMe);
 
       emit(AuthSuccess(user));
     } else {

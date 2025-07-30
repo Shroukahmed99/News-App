@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:news_app/models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class SessionState {}
@@ -7,8 +8,9 @@ abstract class SessionState {}
 class SessionInitial extends SessionState {}
 
 class SessionAuthenticated extends SessionState {
-  final String userId;
-  SessionAuthenticated(this.userId);
+  final UserModel user;
+
+  SessionAuthenticated(this.user);
 }
 
 class SessionUnauthenticated extends SessionState {}
@@ -28,40 +30,44 @@ class SessionCubit extends Cubit<SessionState> {
       return;
     }
 
-    final sessionData = jsonDecode(sessionJson);
-    final loginTime = DateTime.tryParse(sessionData['loginTime'] ?? '');
-    final userId = sessionData['userId'];
+    try {
+      final sessionData = jsonDecode(sessionJson);
+      final loginTime = DateTime.tryParse(sessionData['loginTime'] ?? '');
+      final userData = sessionData['user'];
 
-    if (userId == null || loginTime == null) {
+      if (userData == null || loginTime == null) {
+        emit(SessionUnauthenticated());
+        return;
+      }
+
+      final now = DateTime.now();
+      final expired =
+          now.difference(loginTime).inMinutes > _sessionDurationInMinutes;
+
+      if (expired) {
+        await clearSession();
+      } else {
+        final user = UserModel.fromJson(userData);
+        emit(SessionAuthenticated(user));
+      }
+    } catch (e) {
       emit(SessionUnauthenticated());
-      return;
-    }
-
-    final now = DateTime.now();
-    final expired = now.difference(loginTime).inMinutes > _sessionDurationInMinutes;
-
-    if (expired) {
-      await clearSession();
-    } else {
-      emit(SessionAuthenticated(userId));
     }
   }
 
-  Future<void> setSession(String userId, {bool rememberMe = false}) async {
+  Future<void> setSession(UserModel user, {bool rememberMe = false}) async {
     final prefs = await SharedPreferences.getInstance();
 
-    // Save traditional keys (optional if using user_session only)
-    await prefs.setString("current_user_id", userId);
+    await prefs.setString("current_user_id", user.id);
     await prefs.setBool("remember_me", rememberMe);
 
-    // Save session with login time
     final sessionData = {
-      "userId": userId,
+      "user": user.toJson(),
       "loginTime": DateTime.now().toIso8601String(),
     };
     await prefs.setString(_sessionKey, jsonEncode(sessionData));
 
-    emit(SessionAuthenticated(userId));
+    emit(SessionAuthenticated(user));
   }
 
   Future<void> clearSession() async {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app/models/article_model.dart';
+import 'package:news_app/cubits/bookmarks/bookmarks_cubit.dart';
 
 class NewsTile extends StatelessWidget {
   const NewsTile({
@@ -29,23 +31,21 @@ class NewsTile extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ✅ عرض الصورة فقط إذا لم تكن null
-          if (articleModel.imags != null)
+          if (articleModel.imageUrl != null)
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: Image.network(
-                articleModel.imags!,
+                articleModel.imageUrl!,
                 height: 200,
                 width: double.infinity,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
-                  return const SizedBox(); // لا تعرض شيء عند الفشل
+                  return const SizedBox();
                 },
               ),
             ),
           const SizedBox(height: 12),
 
-          // ✅ عنوان الخبر
           Text(
             articleModel.title,
             maxLines: 2,
@@ -59,17 +59,75 @@ class NewsTile extends StatelessWidget {
 
           const SizedBox(height: 8),
 
-          // ✅ وصف فرعي
-          if (articleModel.supTitle != null)
+          Text(
+            articleModel.description,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.grey,
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                articleModel.source,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.deepPurple,
+                ),
+              ),
+              Text(
+                '${articleModel.publishedAt.toLocal().toString().split(' ').first}',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          if (articleModel.author != null)
             Text(
-              articleModel.supTitle!,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+              'By ${articleModel.author}',
               style: const TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+                color: Colors.black54,
               ),
             ),
+
+          const SizedBox(height: 8),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Category: ${articleModel.category}',
+                style: const TextStyle(fontSize: 12, color: Colors.black87),
+              ),
+              BlocBuilder<BookmarksCubit, List<ArticleModel>>(
+                builder: (context, bookmarks) {
+                  final isSaved = context.read<BookmarksCubit>().isBookmarked(articleModel);
+                  return IconButton(
+                    icon: Icon(
+                      isSaved ? Icons.bookmark : Icons.bookmark_border,
+                      color: isSaved ? Colors.amber : Colors.grey,
+                    ),
+                    onPressed: () {
+                      context.read<BookmarksCubit>().toggleBookmark(articleModel);
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
         ],
       ),
     );
