@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:news_app/views/home/home_view.dart';
 import '../../widgets/form/custom_text_form_field.dart';
 import '../../widgets/form/custom_button.dart';
 import '../../widgets/form/date_picker_form_field.dart';
@@ -149,7 +150,11 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
       const SnackBar(content: Text("Profile updated successfully")),
     );
 
-    Navigator.pop(context);
+  Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(builder: (context) => const HomeScreen()),
+);
+
   }
 },
 
